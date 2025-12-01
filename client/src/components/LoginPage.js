@@ -11,24 +11,16 @@ export function LoginPage(props) {
     e.preventDefault();
     setMessage("");
 
-    // Admin shortcut - show welcome, then route
-    if (
-      form.email &&
-      form.email.toLowerCase() === "admin@okclinic.com" &&
-      props.onLogin
-    ) {
-      setMessage(`Welcome, ${form.email}!`);
-      props.onLogin({ email: form.email });
-      return;
-    }
+
 
     // API sign-in flow for regular users
     try {
-      const res = await fetch("/api/auth/signin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const res = await fetch("http://localhost:5000/api/auth/signin", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(form),
+});
+
       const data = await res.json();
       if (res.ok) {
         setMessage(`Welcome, ${data.name || data.email || "user"}!`);

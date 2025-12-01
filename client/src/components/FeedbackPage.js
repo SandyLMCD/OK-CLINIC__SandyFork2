@@ -1,11 +1,7 @@
-import React from 'react';
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { MessageSquare, Star } from 'lucide-react';
-// import { toast } from 'sonner@2.0.3'; // Uncomment if you want to use this
 
-// --- UI COMPONENTS ---
-
+// UI components
 function Card({ children, className = '', ...props }) {
   return <div className={`rounded-xl border bg-card text-card-foreground shadow ${className}`} {...props}>{children}</div>;
 }
@@ -22,13 +18,13 @@ function CardContent({ children, className = '', ...props }) {
   return <div className={`p-6 pt-0 ${className}`} {...props}>{children}</div>;
 }
 function Button({ children, variant = "default", size = "default", className = '', ...props }) {
-  let base = "inline-flex items-center rounded-md font-medium transition-colors focus-visible:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
-  let variants = {
+  const base = "inline-flex items-center rounded-md font-medium transition-colors focus-visible:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
+  const variants = {
     default: "bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 text-sm",
     outline: "border border-border bg-background hover:bg-accent hover:text-accent-foreground px-4 py-2 text-sm",
     ghost: "hover:bg-accent hover:text-accent-foreground px-2 py-1 text-sm"
   };
-  let sizes = {
+  const sizes = {
     default: "",
     sm: "h-8 px-2 text-xs",
   };
@@ -38,68 +34,16 @@ function Button({ children, variant = "default", size = "default", className = '
     </button>
   );
 }
-function Input({ ...props }) {
+function Input(props) {
   return <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-ring" {...props} />;
 }
 function Label({ children, ...props }) {
   return <label className="text-sm font-medium leading-none block mb-1" {...props}>{children}</label>;
 }
-function Textarea({ ...props }) {
+function Textarea(props) {
   return <textarea className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-ring" {...props} />;
 }
 
-// Basic select/dropdown component:
-function Select({ value, onValueChange, children }) {
-  return (
-    <div className="relative">
-      {children.map(child => {
-        if (child.type === SelectTrigger) {
-          return React.cloneElement(child, { value: value });
-        }
-        if (child.type === SelectContent) {
-          return React.cloneElement(child, { value, onValueChange });
-        }
-        return child;
-      })}
-    </div>
-  );
-}
-
-function SelectTrigger({ children, id, value }) {
-  return (
-    <button id={id} className="flex items-center w-full border border-input rounded px-3 py-2 bg-background justify-between text-start text-sm">
-      {children}
-    </button>
-  );
-}
-function SelectValue({ placeholder }) {
-  return <span className="text-muted-foreground">{placeholder}</span>;
-}
-function SelectContent({ children, value, onValueChange }) {
-  return (
-    <div className="absolute z-10 bg-popover border border-border rounded mt-1 w-full">
-      {children.map(child =>
-        React.cloneElement(child, {
-          onClick: () => onValueChange(child.props.value)
-        })
-      )}
-    </div>
-  );
-}
-function SelectItem({ children, value, onClick }) {
-  return (
-    <div
-      className="px-4 py-2 cursor-pointer hover:bg-muted"
-      onClick={onClick}
-      role="option"
-      aria-selected={typeof value === 'string'}
-    >
-      {children}
-    </div>
-  );
-}
-
-// --- MAIN PAGE ---
 export function FeedbackPage({ user, onNavigate }) {
   const [feedbackForm, setFeedbackForm] = useState({
     category: '',
@@ -108,36 +52,61 @@ export function FeedbackPage({ user, onNavigate }) {
     rating: 0
   });
   const [selectOpen, setSelectOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!feedbackForm.category || !feedbackForm.subject || !feedbackForm.message || feedbackForm.rating === 0) {
-      // toast.error('Please fill in all fields and provide a rating');
-      alert('Please fill in all fields and provide a rating');
+  if (!feedbackForm.category || !feedbackForm.subject || !feedbackForm.message || feedbackForm.rating === 0) {
+    alert('Please fill in all fields and provide a rating');
+    return;
+  }
+
+  try {
+    setSubmitting(true);
+
+    const res = await fetch('/api/feedback', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    ...(user?.token ? { Authorization: 'Bearer ' + user.token } : {})
+  },
+  body: JSON.stringify({
+    category: feedbackForm.category,
+    subject: feedbackForm.subject,
+    message: feedbackForm.message,
+    rating: feedbackForm.rating
+  })
+});
+
+
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (e) {
+      // ignore if no body
+    }
+
+    if (!res.ok || data.success === false) {
+      alert('Submission error: ' + (data.error || 'Unknown error'));
       return;
     }
 
-    // In a real app, this would send to a backend
-    console.log('Feedback submitted:', {
-      ...feedbackForm,
-      userId: user?.id,
-      userName: user?.name,
-      userEmail: user?.email,
-      submittedAt: new Date().toISOString()
-    });
-
-    // toast.success('Thank you for your feedback! We appreciate your input.');
     alert('Thank you for your feedback! We appreciate your input.');
 
-    // Reset form
     setFeedbackForm({
       category: '',
       subject: '',
       message: '',
       rating: 0
     });
-  };
+  } catch (err) {
+    alert('Failed to submit feedback. Please try again.');
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   const StarRating = () => (
     <div className="flex gap-2 mb-1">
@@ -149,10 +118,11 @@ export function FeedbackPage({ user, onNavigate }) {
           className="focus:outline-none transition-colors"
         >
           <Star
-            className={`w-8 h-8 ${star <= feedbackForm.rating
-              ? 'fill-yellow-400 text-yellow-400'
-              : 'text-gray-300'
-              }`}
+            className={`w-8 h-8 ${
+              star <= feedbackForm.rating
+                ? 'fill-yellow-400 text-yellow-400'
+                : 'text-gray-300'
+            }`}
           />
         </button>
       ))}
@@ -193,6 +163,7 @@ export function FeedbackPage({ user, onNavigate }) {
                   </p>
                 )}
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <div style={{ position: "relative" }}>
@@ -204,40 +175,57 @@ export function FeedbackPage({ user, onNavigate }) {
                     <span>
                       {feedbackForm.category
                         ? {
-                          'service-quality': 'Service Quality',
-                          'staff-behavior': 'Staff Behavior',
-                          'facility-cleanliness': 'Facility Cleanliness',
-                          'appointment-booking': 'Appointment Booking',
-                          'pricing': 'Pricing',
-                          'wait-time': 'Wait Time',
-                          'other': 'Other'
-                        }[feedbackForm.category] || "Select a category"
+                            'service-quality': 'Service Quality',
+                            'staff-behavior': 'Staff Behavior',
+                            'facility-cleanliness': 'Facility Cleanliness',
+                            'appointment-booking': 'Appointment Booking',
+                            'pricing': 'Pricing',
+                            'wait-time': 'Wait Time',
+                            'other': 'Other'
+                          }[feedbackForm.category] || "Select a category"
                         : "Select a category"}
                     </span>
                     <span className="ml-2">&#9662;</span>
                   </button>
                   {selectOpen && (
                     <div className="absolute z-10 bg-popover border border-border rounded mt-1 w-full">
-                      <div className="px-4 py-2 cursor-pointer hover:bg-muted" onClick={() => { setFeedbackForm({ ...feedbackForm, category: "service-quality" }); setSelectOpen(false); }}>Service Quality</div>
-                      <div className="px-4 py-2 cursor-pointer hover:bg-muted" onClick={() => { setFeedbackForm({ ...feedbackForm, category: "staff-behavior" }); setSelectOpen(false); }}>Staff Behavior</div>
-                      <div className="px-4 py-2 cursor-pointer hover:bg-muted" onClick={() => { setFeedbackForm({ ...feedbackForm, category: "facility-cleanliness" }); setSelectOpen(false); }}>Facility Cleanliness</div>
-                      <div className="px-4 py-2 cursor-pointer hover:bg-muted" onClick={() => { setFeedbackForm({ ...feedbackForm, category: "appointment-booking" }); setSelectOpen(false); }}>Appointment Booking</div>
-                      <div className="px-4 py-2 cursor-pointer hover:bg-muted" onClick={() => { setFeedbackForm({ ...feedbackForm, category: "pricing" }); setSelectOpen(false); }}>Pricing</div>
-                      <div className="px-4 py-2 cursor-pointer hover:bg-muted" onClick={() => { setFeedbackForm({ ...feedbackForm, category: "wait-time" }); setSelectOpen(false); }}>Wait Time</div>
-                      <div className="px-4 py-2 cursor-pointer hover:bg-muted" onClick={() => { setFeedbackForm({ ...feedbackForm, category: "other" }); setSelectOpen(false); }}>Other</div>
+                      {[
+                        ['service-quality', 'Service Quality'],
+                        ['staff-behavior', 'Staff Behavior'],
+                        ['facility-cleanliness', 'Facility Cleanliness'],
+                        ['appointment-booking', 'Appointment Booking'],
+                        ['pricing', 'Pricing'],
+                        ['wait-time', 'Wait Time'],
+                        ['other', 'Other'],
+                      ].map(([value, label]) => (
+                        <div
+                          key={value}
+                          className="px-4 py-2 cursor-pointer hover:bg-muted"
+                          onClick={() => {
+                            setFeedbackForm({ ...feedbackForm, category: value });
+                            setSelectOpen(false);
+                          }}
+                        >
+                          {label}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="subject">Subject</Label>
                 <Input
                   id="subject"
                   placeholder="Brief description of your feedback"
                   value={feedbackForm.subject}
-                  onChange={(e) => setFeedbackForm({ ...feedbackForm, subject: e.target.value })}
+                  onChange={(e) =>
+                    setFeedbackForm({ ...feedbackForm, subject: e.target.value })
+                  }
                 />
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="message">Your Feedback</Label>
                 <Textarea
@@ -245,12 +233,15 @@ export function FeedbackPage({ user, onNavigate }) {
                   placeholder="Please share your thoughts, suggestions, or concerns..."
                   rows={6}
                   value={feedbackForm.message}
-                  onChange={(e) => setFeedbackForm({ ...feedbackForm, message: e.target.value })}
+                  onChange={(e) =>
+                    setFeedbackForm({ ...feedbackForm, message: e.target.value })
+                  }
                 />
               </div>
+
               <div className="flex gap-4">
-                <Button type="submit" className="flex-1">
-                  Submit Feedback
+                <Button type="submit" className="flex-1" disabled={submitting}>
+                  {submitting ? 'Submitting...' : 'Submit Feedback'}
                 </Button>
                 <Button
                   type="button"
@@ -263,6 +254,7 @@ export function FeedbackPage({ user, onNavigate }) {
             </form>
           </CardContent>
         </Card>
+
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Contact Information</CardTitle>
