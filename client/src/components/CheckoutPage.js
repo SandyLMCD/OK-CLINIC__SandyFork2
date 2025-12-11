@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Calendar, Clock, Heart, CheckCircle } from "lucide-react";
+import "../edit/CheckoutPage.css";
 
 // --- UI COMPONENTS (INLINE) ---
 function Card({ children, className = "", ...props }) {
@@ -50,10 +51,7 @@ function Input(props) {
 }
 function Label({ children, ...props }) {
   return (
-    <label
-      className="text-sm font-medium leading-none block mb-1"
-      {...props}
-    >
+    <label className="text-sm font-medium leading-none block mb-1" {...props}>
       {children}
     </label>
   );
@@ -141,12 +139,11 @@ export function CheckoutPage({
 
     const body = {
       petName: appointment.pet.name,
-      services: services.map((s) => s.name), // matches Invoice.services: [String]
+      services: services.map((s) => s.name),
       amount: servicesTotal,
       invoiceNumber: `INV-${Date.now()}`,
       date: today,
       dueDate: today,
-     
     };
 
     const res = await fetch("http://localhost:5000/api/invoices", {
@@ -161,21 +158,18 @@ export function CheckoutPage({
     if (!res.ok) {
       throw new Error(data.error || "Failed to create invoice");
     }
-    return data; // created invoice document
+    return data;
   };
 
   const handlePayment = async () => {
     if (processing) return;
     try {
       setProcessing(true);
-      // simulate card processing delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
       const invoice = await createInvoice();
       onPaymentComplete(invoice);
     } catch (err) {
       console.error("Payment / invoice error:", err);
-      // optional: show toast or alert here
     } finally {
       setProcessing(false);
     }
@@ -183,7 +177,7 @@ export function CheckoutPage({
 
   const handleFreeBooking = async () => {
     try {
-      const invoice = await createInvoice(); // still create invoice even if amount is 0
+      const invoice = await createInvoice();
       onPaymentComplete(invoice);
     } catch (err) {
       console.error("Free booking / invoice error:", err);
@@ -193,7 +187,7 @@ export function CheckoutPage({
   // Basic guard: if key fields are missing, send user back
   if (!appointment?.date || !appointment?.time || !appointment?.pet) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="booking-container mx-auto p-6">
         <Card className="max-w-md mx-auto text-center">
           <CardContent className="p-8">
             <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -213,60 +207,71 @@ export function CheckoutPage({
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="booking-container mx-auto p-6 space-y-6">
       <div>
-        <h1>Checkout</h1>
+        <h1 className="text-2xl font-semibold">Checkout</h1>
         <p className="text-muted-foreground">
           Review and confirm your appointment
         </p>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column - Appointment Details */}
-        <div className="space-y-6">
-          {/* Appointment Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+
+      <div className="booking-two-column">
+        {/* Left Column - Appointment Details & Services */}
+        <div className="booking-column space-y-6">
+          {/* Appointment Summary (matches confirmation style) */}
+          <Card className="appointment-card">
+            <CardHeader className="appointment-card-header">
+              <CardTitle className="appointment-card-title">
                 <Calendar className="w-5 h-5" />
-                Appointment Details
+                <span>Appointment Details</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-muted-foreground">Date</p>
-                  <p>{new Date(appointment.date).toLocaleDateString()}</p>
+            <CardContent className="appointment-card-content">
+              <div className="appointment-row">
+                <div className="appointment-field">
+                  <p className="appointment-label">Date</p>
+                  <p className="appointment-value">
+                    {new Date(appointment.date).toLocaleDateString()}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-muted-foreground">Time</p>
-                  <p className="flex items-center gap-1">
+                <div className="appointment-field appointment-field-right">
+                  <p className="appointment-label">Time</p>
+                  <p className="appointment-value appointment-time">
                     <Clock className="w-4 h-4" />
-                    {appointment.time}
+                    <span>{appointment.time}</span>
                   </p>
                 </div>
               </div>
-              <Separator />
-              <div>
-                <p className="text-muted-foreground">Pet</p>
-                <div className="flex items-center justify-between mt-1">
+
+              <hr className="appointment-divider" />
+
+              <div className="appointment-pet-section">
+                <p className="appointment-label">Pet</p>
+                <div className="appointment-pet-row">
                   <div>
-                    <p>{appointment.pet.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="appointment-pet-name">
+                      {appointment.pet.name}
+                    </p>
+                    <p className="appointment-pet-meta">
                       {appointment.pet.breed} • {appointment.pet.age} years old
                     </p>
                   </div>
-                  <Badge variant="outline">{appointment.pet.species}</Badge>
+                  <Badge variant="outline" className="appointment-species-pill">
+                    {appointment.pet.species}
+                  </Badge>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Services */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Selected Services</CardTitle>
+          {/* Selected Services (matches confirmation style) */}
+          <Card className="selected-services-card">
+            <CardHeader className="selected-services-header">
+              <CardTitle className="selected-services-title">
+                Selected Services
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="selected-services-content">
               {isBookingOnly ? (
                 <div className="text-center py-6">
                   <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
@@ -276,91 +281,126 @@ export function CheckoutPage({
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {services.map((service) => (
-                    <div
-                      key={service.id || service._id || service.name}
-                      className="flex justify-between items-start"
-                    >
-                      <div className="flex-1">
-                        <p>{service.name}</p>
-                        {service.duration != null && (
-                          <p className="text-sm text-muted-foreground">
-                            {service.duration} minutes
+                <>
+                  <div className="selected-services-list">
+                    {services.map((service) => (
+                      <div
+                        key={service.id || service._id || service.name}
+                        className="selected-service-row"
+                      >
+                        <div>
+                          <p className="selected-service-name">
+                            {service.name}
                           </p>
-                        )}
+                          {service.duration != null && (
+                            <p className="selected-service-duration">
+                              {service.duration} minutes
+                            </p>
+                          )}
+                        </div>
+                        <p className="selected-service-price">
+                          ${Number(service.price || 0).toFixed(2)}
+                        </p>
                       </div>
-                      <p>${Number(service.price || 0).toFixed(2)}</p>
-                    </div>
-                  ))}
-                  <Separator />
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
+                    ))}
+                  </div>
+
+                  <hr className="selected-services-divider" />
+
+                  <div className="selected-services-total-row">
+                    <span className="selected-services-total-label">
                       Services Total:
                     </span>
-                    <span>${servicesTotal.toFixed(2)}</span>
+                    <span className="selected-services-total-value">
+                      ${servicesTotal.toFixed(2)}
+                    </span>
                   </div>
-                  <div className="flex justify-between items-start border-t pt-3">
-                    <div>
-                      <p>50% Deposit Required</p>
-                      <p className="text-sm text-muted-foreground">
-                        Non-refundable
-                      </p>
-                    </div>
-                    <p className="text-lg">${depositAmount.toFixed(2)}</p>
-                  </div>
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Balance Due (at appointment):</span>
-                    <span>${balanceDue.toFixed(2)}</span>
-                  </div>
-                </div>
+                </>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Right Column - Payment */}
-        <div className="space-y-6">
+        {/* Right Column - Payment Summary & Payment */}
+        <div className="booking-column space-y-6">
           {isBookingOnly ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Confirm Booking</CardTitle>
+            <Card className="confirmation-actions-card">
+              <CardHeader className="payment-card-header">
+                <CardTitle className="payment-card-title">
+                  Confirm Booking
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center py-6">
+              <CardContent className="confirmation-actions-content">
+                <div className="text-center mb-2">
                   <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                  <h3>No Payment Required</h3>
-                  <p className="text-muted-foreground mb-6">
+                  <h3 className="text-lg font-semibold">No Payment Required</h3>
+                  <p className="text-muted-foreground">
                     Your appointment booking does not require a deposit. Click
                     below to confirm.
                   </p>
-                  <Button className="w-full" onClick={handleFreeBooking}>
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Confirm Booking
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-4">
-                    By confirming, you agree to our terms of service and booking
-                    policy.
-                  </p>
                 </div>
+
+                <Button
+                  className="confirmation-primary-btn"
+                  onClick={handleFreeBooking}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Confirm Booking
+                </Button>
+
+                <p className="confirmation-helper-text">
+                  By confirming, you agree to our terms of service and booking
+                  policy.
+                </p>
               </CardContent>
             </Card>
           ) : (
             <>
-              {/* Payment Method */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Payment Method</CardTitle>
-                  <CardDescription>
-                    Pay 50% deposit (${depositAmount.toFixed(2)}) to secure your
-                    appointment.
-                  </CardDescription>
+              {/* Payment Summary (matches confirmation Payment Summary) */}
+              <Card className="payment-card">
+                <CardHeader className="payment-card-header">
+                  <CardTitle className="payment-card-title">
+                    Payment Summary
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-4">
-                    <p className="text-sm">
-                      <strong>Note:</strong> The deposit is non-refundable.
-                      Remaining balance (${balanceDue.toFixed(2)}) is due at
+                <CardContent className="payment-card-content">
+                  <div className="payment-row">
+                    <span className="payment-label">Services Total:</span>
+                    <span className="payment-value">
+                      ${servicesTotal.toFixed(2)}
+                    </span>
+                  </div>
+
+                  <hr className="payment-divider" />
+
+                  <div className="payment-row">
+                    <div>
+                      <p className="payment-label-strong">
+                        50% Deposit Required
+                      </p>
+                      <p className="payment-subtext">Non-refundable</p>
+                    </div>
+                    <span className="payment-value">
+                      ${depositAmount.toFixed(2)}
+                    </span>
+                  </div>
+
+                  <hr className="payment-divider" />
+
+                  <div className="payment-row">
+                    <div>
+                      <p className="payment-label-strong">Balance Due:</p>
+                      <p className="payment-subtext">Payable at appointment</p>
+                    </div>
+                    <span className="payment-value payment-value-muted">
+                      ${balanceDue.toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="payment-note">
+                    <p className="payment-note-text">
+                      <strong>Note:</strong> The 50% deposit ($
+                      {depositAmount.toFixed(2)}) is non-refundable and secures
                       your appointment.
                     </p>
                   </div>
@@ -368,12 +408,14 @@ export function CheckoutPage({
               </Card>
 
               {/* Card Details */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Card Details</CardTitle>
+              <Card className="card-details-card">
+                <CardHeader className="card-details-header">
+                  <CardTitle className="text-base font-semibold">
+                    Card Details
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
+                <CardContent className="card-details-content">
+                  <div className="card-details-field">
                     <Label htmlFor="cardName">Cardholder Name</Label>
                     <Input
                       id="cardName"
@@ -387,7 +429,8 @@ export function CheckoutPage({
                       }
                     />
                   </div>
-                  <div>
+
+                  <div className="card-details-field">
                     <Label htmlFor="cardNumber">Card Number</Label>
                     <Input
                       id="cardNumber"
@@ -401,8 +444,9 @@ export function CheckoutPage({
                       }
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
+
+                  <div className="card-details-row">
+                    <div className="card-details-field">
                       <Label htmlFor="expiry">Expiry Date</Label>
                       <Input
                         id="expiry"
@@ -416,7 +460,7 @@ export function CheckoutPage({
                         }
                       />
                     </div>
-                    <div>
+                    <div className="card-details-field">
                       <Label htmlFor="cvv">CVV</Label>
                       <Input
                         id="cvv"
@@ -434,38 +478,38 @@ export function CheckoutPage({
                 </CardContent>
               </Card>
 
-              {/* Confirm Payment */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <p className="text-muted-foreground">Deposit Amount</p>
-                      <p className="text-2xl font-semibold">
-                        ${depositAmount.toFixed(2)}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        (50% of ${servicesTotal.toFixed(2)} total)
-                      </p>
-                    </div>
-                    <Button
-                      className="w-full"
-                      onClick={handlePayment}
-                      disabled={processing}
-                    >
-                      {processing ? (
-                        <>Processing...</>
-                      ) : (
-                        <>
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          Confirm &amp; Pay ${depositAmount.toFixed(2)}
-                        </>
-                      )}
-                    </Button>
-                    <p className="text-xs text-muted-foreground text-center">
-                      By confirming, you agree to our terms of service and
-                      booking policy.
+              {/* Confirm Payment (matches confirmation button card style) */}
+              <Card className="confirmation-actions-card">
+                <CardContent className="confirmation-actions-content">
+                  <div className="confirmation-amount-block">
+                    <p className="confirmation-amount-label">Deposit Amount</p>
+                    <p className="confirmation-amount-value">
+                      ${depositAmount.toFixed(2)}
+                    </p>
+                    <p className="confirmation-amount-subtext">
+                      (50% of ${servicesTotal.toFixed(2)} total)
                     </p>
                   </div>
+
+                  <Button
+                    className="confirmation-primary-btn"
+                    onClick={handlePayment}
+                    disabled={processing}
+                  >
+                    {processing ? (
+                      <>Processing...</>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Confirm &amp; Pay ${depositAmount.toFixed(2)}
+                      </>
+                    )}
+                  </Button>
+
+                  <p className="confirmation-helper-text">
+                    By confirming, you agree to our terms of service and booking
+                    policy.
+                  </p>
                 </CardContent>
               </Card>
             </>

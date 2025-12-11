@@ -1,0 +1,102 @@
+.card-details-card {
+  border-radius: 1rem;
+}
+
+.card-details-header {
+  padding: 1.25rem 1.5rem 0.75rem 1.5rem;
+}
+
+.card-details-content {
+  padding: 0 1.5rem 1.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* space between groups */
+}
+
+/* One field: label + input */
+.card-details-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem; /* space between label and input */
+}
+
+.card-details-field label {
+  font-weight: 600;
+}
+
+/* Inputs */
+.card-details-field input {
+  background-color: #f5f5f7;
+  border-radius: 0.6rem;
+  border-color: transparent;
+  padding: 0.75rem 1rem;
+}
+
+.card-details-field input:focus-visible {
+  background-color: #ffffff;
+}
+
+/* Expiry / CVV row */
+.card-details-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem; /* space between the two columns */
+}
+
+.confirmation-actions-card {
+  border-radius: 1rem;
+}
+
+.confirmation-actions-content {
+  padding: 1.75rem 2rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Amount block */
+.confirmation-amount-block {
+  text-align: center;
+}
+
+.confirmation-amount-label {
+  font-size: 0.95rem;
+  color: var(--color-muted-foreground);
+  margin-bottom: 0.25rem;
+}
+
+.confirmation-amount-value {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.confirmation-amount-subtext {
+  font-size: 0.85rem;
+  color: var(--color-muted-foreground);
+}
+
+/* Primary pill button */
+.confirmation-primary-btn {
+  width: 100%;
+  border-radius: 9999px;
+  height: 2.75rem;
+  justify-content: center;
+  background-color: #050315;
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.confirmation-primary-btn:hover {
+  background-color: #020012;
+}
+
+/* Helper text */
+.confirmation-helper-text {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  text-align: center;
+  color: var(--color-muted-foreground);
+}
