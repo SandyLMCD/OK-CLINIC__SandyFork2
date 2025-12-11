@@ -1,51 +1,57 @@
-const express = require('express');
-const Booking = require('../models/Booking');
-const Pet = require('../models/Pet');
+// routes/booking.js
+const express = require("express");
+const Booking = require("../models/Booking");
+const Pet = require("../models/Pet");
 
 const router = express.Router();
 
 function requireAuth(req, res, next) {
-  if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
   next();
 }
 
 // Create booking (customer)
-router.post('/', requireAuth, async (req, res) => {
+router.post("/", requireAuth, async (req, res) => {
   try {
     const { date, time, pet, services, notes } = req.body;
 
     const conflict = await Booking.findOne({
       date,
       time,
-      status: { $ne: 'cancelled' }
+      status: { $ne: "cancelled" },
     });
-    if (conflict) return res.status(409).json({ error: 'Slot already booked' });
+    if (conflict) return res.status(409).json({ error: "Slot already booked" });
 
     const petObj = await Pet.findOne({ _id: pet, owner: req.user._id });
     if (!petObj) {
       return res
         .status(403)
-        .json({ error: 'Pet not found or does not belong to user' });
+        .json({ error: "Pet not found or does not belong to user" });
     }
 
     const total =
       services?.reduce((sum, svc) => sum + (svc.price || 0), 0) || 0;
     const depositPaid = total > 0 ? total * 0.5 : 0;
 
+    // NEW: exact Date for reminder scheduling
+    const appointmentDateTime = new Date(`${date}T${time}:00`);
+
     const booking = new Booking({
       customer: req.user._id,
       pet,
       date,
       time,
+      appointmentDateTime,   // save combined datetime
       services,
       total,
       depositPaid,
       notes,
-      status: 'upcoming'
+      status: "upcoming",
+      // reminderSent will default to false from the schema
     });
 
     await booking.save();
-    await booking.populate('pet', 'name species breed age');
+    await booking.populate("pet", "name species breed age");
 
     res.status(201).json(booking);
   } catch (e) {
@@ -54,10 +60,10 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // Customer: own bookings
-router.get('/', requireAuth, async (req, res) => {
+router.get("/", requireAuth, async (req, res) => {
   try {
     const bookings = await Booking.find({ customer: req.user._id }).populate(
-      'pet'
+      "pet"
     );
     res.json(bookings);
   } catch (e) {
@@ -66,11 +72,12 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 // Admin: all bookings
-router.get('/admin', requireAuth, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
+router.get("/admin", requireAuth, async (req, res) => {
+  if (req.user.role !== "admin")
+    return res.status(403).json({ error: "Forbidden" });
   const bookings = await Booking.find()
-    .populate('customer', 'name email')
-    .populate('pet', 'name species breed age');
+    .populate("customer", "name email")
+    .populate("pet", "name species breed age");
   res.json(bookings);
 });
 

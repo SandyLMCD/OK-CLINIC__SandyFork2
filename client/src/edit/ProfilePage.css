@@ -1,8 +1,16 @@
 /* ProfilePage.css */
+:root {
+  --color-primary: #000000; /* navbar/profile buttons text */
+  --color-border: #e5e7eb; /* card and appointment borders */
+  --color-muted-foreground: #6b7280; /* grey labels/text */
+  --color-muted: #f3f4f6; /* subtle background for notes, forms */
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+}
 
 /* Main container */
 .profile-container {
-  max-width: 80rem;
+  max-width: 80rem; /* container */
   margin: 0 auto;
   padding: 1.5rem;
   display: flex;

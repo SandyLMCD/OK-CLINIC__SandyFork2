@@ -149,9 +149,11 @@ export function SignupPage(props) {
             setCodeSent(false);
             handleChange(e);
           }}
+          className="sendCode-input"
         />
         <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}>
           <button
+            // name="sendCode"
             type="button"
             onClick={handleSendCode}
             disabled={loading || !form.email}
@@ -169,7 +171,9 @@ export function SignupPage(props) {
               value={verificationCode}
               maxLength={6}
               onChange={(e) => setVerificationCode(e.target.value)}
+              className="sendCode-input"
             />
+
             <button
               type="button"
               onClick={handleVerifyCode}
@@ -185,7 +189,7 @@ export function SignupPage(props) {
             Email verified.
           </div>
         )}
-
+        <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}></div>
         <label>Phone Number</label>
         <input
           name="phone"

@@ -11,15 +11,13 @@ export function LoginPage(props) {
     e.preventDefault();
     setMessage("");
 
-
-
     // API sign-in flow for regular users
     try {
       const res = await fetch("http://localhost:5000/api/auth/signin", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(form),
-});
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
       const data = await res.json();
       if (res.ok) {

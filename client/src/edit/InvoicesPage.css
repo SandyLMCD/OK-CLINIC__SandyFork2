@@ -1,0 +1,128 @@
+.invoices-container {
+  max-width: 80rem; /* same width as profile-container */
+  margin: 0 auto; /* center on page */
+  padding: 1.5rem; /* same inner padding */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.backToProfile {
+  margin-bottom: 1rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem; /* matches gap-4 */
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .summary-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.invoice-tabs-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 4 equal tabs */
+  width: 100%;
+  border-radius: 9999px;
+  /* overflow: hidden; */
+  border: 1px solid var(--border);
+}
+
+.invoice-tabs-list button {
+  width: 100%;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Table shell */
+/* .invoice-table-wrapper {
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+} */
+
+/* Header cells */
+.invoice-th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #f5f8fe;
+  white-space: nowrap;
+}
+
+/* Body cells */
+/* .invoice-td {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  vertical-align: top;
+}
+
+.invoice-td.text-right {
+  text-align: right;
+} */
+
+.invoice-status-badge {
+  border-radius: 9999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.invoice-status-paid {
+  background: #bbf7d0;
+  color: #16a34a;
+  border: 1px solid #86efac;
+}
+
+.invoice-status-pending {
+  background: #fef9c3;
+  color: #eab308;
+  border: 1px solid #fde68a;
+}
+
+.invoice-status-overdue {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* Body rows span full width with subtle separators */
+.invoice-tr {
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #ffffff;
+  width: 100%;
+}
+
+.invoice-tr:last-child {
+  border-bottom: none;
+}
+
+/* Body cells */
+.invoice-td {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  vertical-align: top;
+}
+
+/* Right‑aligned cells reuse same width */
+.invoice-td.text-right {
+  text-align: right;
+}
+
+.invoice-table-content {
+  padding: 0;
+}
+
+.invoice-table-wrapper {
+  width: 100%;
+  border-top: 1px solid var(--border);
+  /* no extra left/right margin or padding */
+}

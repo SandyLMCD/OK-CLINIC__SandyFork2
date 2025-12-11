@@ -7,6 +7,7 @@ import {
   DollarSign,
   CheckCircle,
 } from "lucide-react";
+import "../edit/BookingPage.css";
 
 /* ---------------- UI COMPONENTS (INLINE) ---------------- */
 
@@ -73,8 +74,9 @@ function Button({
     ghost: "hover:bg-accent hover:text-accent-foreground px-2 py-1 text-sm",
   };
   const sizes = {
-    default: "",
-    sm: "h-8 px-2 text-xs",
+    sm: "h-7 px-2 text-xs",
+    md: "h-8 px-3 text-sm",
+    lg: "h-9 px-4 text-sm",
   };
 
   return (
@@ -332,16 +334,14 @@ export function BookingPage({
     const dateStr = selectedDate.toISOString().split("T")[0];
     return !appointments.some(
       (apt) =>
-        apt.date === dateStr &&
-        apt.time === time &&
-        apt.status !== "cancelled"
+        apt.date === dateStr && apt.time === time && apt.status !== "cancelled"
     );
   };
 
   /* ---------- Step 1: Booking Details ---------- */
   if (currentStep === "details") {
     return (
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="booking-container mx-auto p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-semibold">Book Appointment</h1>
           <p className="text-muted-foreground">
@@ -459,7 +459,7 @@ export function BookingPage({
                   {selectedDate
                     ? `Available slots for ${selectedDate.toLocaleDateString()}`
                     : "Please select a date first"}
-              </CardDescription>
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {selectedDate ? (
@@ -513,9 +513,7 @@ export function BookingPage({
 
                   {selectedPet && (
                     <div className="pt-3 border-t">
-                      <p className="text-muted-foreground mb-2">
-                        Pet Details:
-                      </p>
+                      <p className="text-muted-foreground mb-2">Pet Details:</p>
                       <p>
                         {selectedPet.breed} • {selectedPet.age} years old
                       </p>
@@ -524,7 +522,7 @@ export function BookingPage({
                 </div>
 
                 <Button
-                  className="w-full mt-6"
+                  className="w-full mt-6 btn-pill btn-pill-primary"
                   onClick={handleNextFromDetails}
                   disabled={!isDetailsValid}
                 >
@@ -801,9 +799,7 @@ export function BookingPage({
                               Non-refundable
                             </p>
                           </div>
-                          <p className="text-lg">
-                            ${depositAmount.toFixed(2)}
-                          </p>
+                          <p className="text-lg">${depositAmount.toFixed(2)}</p>
                         </div>
                       </div>
 

@@ -1,4 +1,3 @@
-// routes/auth.js
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -7,7 +6,6 @@ const User = require("../models/User");
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
-
 // simple in-memory storage for signup verification
 global.signupCodes = global.signupCodes || new Map();   // email -> { code, expiresAt }
 global.verifiedEmails = global.verifiedEmails || new Set(); // verified email strings

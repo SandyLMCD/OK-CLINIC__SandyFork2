@@ -1,11 +1,13 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const JWT_SECRET = 'secret';
+const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 module.exports = async function authMiddleware(req, res, next) {
   // Allow unauthenticated access to auth routes (signup/signin/reset)
-  if (req.path.startsWith('/api/auth')) return next();
+  if (req.originalUrl.startsWith('/api/auth')) {
+    return next();
+  }
 
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ')
@@ -21,10 +23,12 @@ module.exports = async function authMiddleware(req, res, next) {
     const user = await User.findById(decoded.id).select(
       '-password -resetCode -resetCodeExpiry'
     );
+
     if (!user) {
       return res.status(401).json({ error: 'Invalid token user' });
     }
-    req.user = user;          // <- this is what requireAdmin uses
+
+    req.user = user; // used by requireAdmin and others
     next();
   } catch (err) {
     console.error('authMiddleware error:', err.message);

@@ -8,6 +8,7 @@ import {
   Calendar,
   DollarSign,
 } from "lucide-react";
+import "../edit/InvoicesPage.css";
 
 /* ---------- Generic UI components ---------- */
 
@@ -44,7 +45,7 @@ function CardDescription({ children, className = "" }) {
 }
 function CardContent({ children, className = "", ...props }) {
   return (
-    <div className={`p-6 pt-0 ${className}`} {...props}>
+    <div className={`${className || "p-6 pt-0"}`} {...props}>
       {children}
     </div>
   );
@@ -103,22 +104,18 @@ function Table({ children, ...props }) {
     </table>
   );
 }
-function TableHead({ children }) {
-  return (
-    <th className="px-4 py-2 text-left font-semibold whitespace-nowrap">
-      {children}
-    </th>
-  );
+function TableHead({ children, className = "" }) {
+  return <th className={`invoice-th ${className}`}>{children}</th>;
 }
 function TableHeader({ children }) {
   return <thead className="bg-muted">{children}</thead>;
 }
-function TableRow({ children }) {
-  return <tr className="border-b">{children}</tr>;
+function TableRow({ children, className = "" }) {
+  return <tr className={`invoice-tr ${className}`}>{children}</tr>;
 }
 function TableCell({ children, colSpan, className = "" }) {
   return (
-    <td className={`px-4 py-2 align-top ${className}`} colSpan={colSpan}>
+    <td className={`invoice-td ${className}`} colSpan={colSpan}>
       {children}
     </td>
   );
@@ -183,7 +180,9 @@ function Tabs({ children, className = "" }) {
 }
 function TabsList({ children, className }) {
   return (
-    <div className={`inline-flex border rounded mb-2 overflow-hidden ${className}`}>
+    <div
+      className={`inline-flex border rounded mb-2 overflow-hidden ${className}`}
+    >
       {children}
     </div>
   );
@@ -224,10 +223,7 @@ export function InvoicesPage({ user, invoices, onNavigate, onPayInvoice }) {
   const totalAmount = sum(filteredInvoices);
   const totalPaid = sum(filteredInvoices, (inv) => inv.status === "paid");
   const totalPending = sum(filteredInvoices, (inv) => inv.status === "pending");
-  const totalOverdue = sum(
-    filteredInvoices,
-    (inv) => inv.status === "overdue"
-  );
+  const totalOverdue = sum(filteredInvoices, (inv) => inv.status === "overdue");
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -245,8 +241,8 @@ export function InvoicesPage({ user, invoices, onNavigate, onPayInvoice }) {
   const closeDialog = () => setSelectedInvoice(null);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="invoices-container min-h-screen bg-background">
+      <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -255,13 +251,17 @@ export function InvoicesPage({ user, invoices, onNavigate, onPayInvoice }) {
               Track and manage your veterinary invoices
             </p>
           </div>
-          <Button variant="outline" onClick={() => onNavigate("profile")}>
+          <Button
+            variant="outline"
+            className="btn-pill btn-pill-primary backToProfile"
+            onClick={() => onNavigate("profile")}
+          >
             Back to Profile
           </Button>
         </div>
 
         {/* Summary cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="summary-grid">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center justify-between text-base">
@@ -287,7 +287,9 @@ export function InvoicesPage({ user, invoices, onNavigate, onPayInvoice }) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-primary text-lg">${totalPaid.toFixed(2)}</div>
+              <div className="text-primary text-lg">
+                ${totalPaid.toFixed(2)}
+              </div>
               <p className="text-muted-foreground mt-1">
                 {filteredInvoices.filter((inv) => inv.status === "paid").length}{" "}
                 invoices
@@ -344,9 +346,9 @@ export function InvoicesPage({ user, invoices, onNavigate, onPayInvoice }) {
             <CardTitle>Invoice History</CardTitle>
             <CardDescription>View and manage your invoices</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="invoice-table-content">
             <Tabs className="mb-3">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="invoice-tabs-list">
                 <TabsTrigger
                   isActive={filterStatus === "all"}
                   onClick={() => setFilterStatus("all")}
@@ -373,7 +375,7 @@ export function InvoicesPage({ user, invoices, onNavigate, onPayInvoice }) {
                 </TabsTrigger>
               </TabsList>
               <TabsContent>
-                <div className="rounded-md border overflow-x-auto">
+                <div className="invoice-table-wrapper">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -408,9 +410,7 @@ export function InvoicesPage({ user, invoices, onNavigate, onPayInvoice }) {
                               <TableCell>{invoice.invoiceNumber}</TableCell>
                               <TableCell>
                                 {invoice.date
-                                  ? new Date(
-                                      invoice.date
-                                    ).toLocaleDateString()
+                                  ? new Date(invoice.date).toLocaleDateString()
                                   : "-"}
                               </TableCell>
                               <TableCell>{invoice.petName}</TableCell>

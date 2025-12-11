@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import "../edit/ProfilePage.css";
 
-
 /* ---------- Reusable UI primitives ---------- */
 
 function Card({ children, className = "", ...props }) {
@@ -51,23 +50,26 @@ function CardContent({ children, className = "", ...props }) {
 function Button({
   children,
   variant = "default",
-  size = "default",
+  size = "md",
   className = "",
   ...props
 }) {
   const base =
     "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
+
   const variants = {
-    default:
-      "bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 text-sm",
+    default: "bg-primary text-primary-foreground hover:bg-primary/90",
     outline:
-      "border border-border bg-background hover:bg-accent hover:text-accent-foreground px-4 py-2 text-sm",
-    ghost: "hover:bg-accent hover:text-accent-foreground px-2 py-1 text-sm",
+      "border border-border bg-background hover:bg-accent hover:text-accent-foreground",
+    ghost: "bg-transparent text-primary hover:bg-accent",
   };
+
   const sizes = {
-    default: "",
-    sm: "h-8 px-2 text-xs",
+    sm: "h-7 px-2 text-xs",
+    md: "h-8 px-3 text-sm",
+    lg: "h-9 px-4 text-sm",
   };
+
   return (
     <button
       className={`${base} ${variants[variant] || ""} ${
@@ -79,20 +81,18 @@ function Button({
     </button>
   );
 }
+
 function Input(props) {
   return (
     <input
-      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm profile-input"
       {...props}
     />
   );
 }
 function Label({ children, ...props }) {
   return (
-    <label
-      className="text-sm font-medium leading-none mb-2 block"
-      {...props}
-    >
+    <label className="text-sm font-medium leading-none mb-2 block" {...props}>
       {children}
     </label>
   );
@@ -148,6 +148,15 @@ export function ProfilePage({
 
   const [pets, setPets] = useState(initialPets || []);
   const [message, setMessage] = useState("");
+
+  // NEW: state for editing a pet
+  const [editingPetId, setEditingPetId] = useState(null);
+  const [editPetForm, setEditPetForm] = useState({
+    name: "",
+    species: "",
+    breed: "",
+    age: 0,
+  });
 
   if (!user) return null;
 
@@ -215,17 +224,66 @@ export function ProfilePage({
     }
   };
 
+  // NEW: update pet handler
+  const handleUpdatePet = async () => {
+    if (!editingPetId) return;
+
+    setMessage("");
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/pets/${editingPetId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({
+            name: editPetForm.name,
+            species: editPetForm.species,
+            breed: editPetForm.breed,
+            age: editPetForm.age,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (res.ok) {
+        setPets((prev) =>
+          prev.map((p) =>
+            (p._id || p.id) === editingPetId ? { ...p, ...data } : p
+          )
+        );
+        setEditingPetId(null);
+        setMessage("Pet updated successfully.");
+      } else {
+        setMessage(data.error || "Failed to update pet.");
+      }
+    } catch {
+      setMessage("Error connecting to server.");
+    }
+  };
+
   return (
     <div className="profile-container">
       {/* Header */}
       <div className="profile-header">
         <h1 className="text-2xl font-semibold">My Profile</h1>
         <div className="profile-header-buttons">
-          <Button onClick={() => onNavigate("booking")}>
+          <Button
+            size="md"
+            className="btn-pill btn-pill-primary"
+            onClick={() => onNavigate("booking")}
+          >
             <Calendar className="w-4 h-4 mr-2" />
             Book Appointment
           </Button>
-          <Button variant="outline" onClick={() => onNavigate("invoices")}>
+          <Button
+            variant="outline"
+            size="md"
+            className="btn-pill btn-pill-secondary"
+            onClick={() => onNavigate("invoices")}
+          >
             <DollarSign className="w-4 h-4 mr-2" />
             Manage Balance
           </Button>
@@ -246,6 +304,7 @@ export function ProfilePage({
             <Button
               variant="outline"
               size="sm"
+              className="btn-pill btn-pill-outline"
               onClick={() => setEditingUser((prev) => !prev)}
             >
               <Edit className="w-4 h-4 mr-2" />
@@ -300,7 +359,13 @@ export function ProfilePage({
                   />
                 </div>
               </div>
-              <Button onClick={handleUserSave}>Save Changes</Button>
+              <Button
+                size="md"
+                className="btn-pill btn-pill-primary"
+                onClick={handleUserSave}
+              >
+                Save Changes
+              </Button>
             </>
           ) : (
             <div className="profile-grid-2col">
@@ -333,7 +398,12 @@ export function ProfilePage({
               <CardTitle>Upcoming Appointments</CardTitle>
               <CardDescription>Your scheduled appointments</CardDescription>
             </div>
-            <Button variant="outline" onClick={() => onNavigate("invoices")}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="btn-pill btn-pill-outline"
+              onClick={() => onNavigate("invoices")}
+            >
               View All Invoices
             </Button>
           </div>
@@ -400,8 +470,8 @@ export function ProfilePage({
                             </Badge>
                           )}
                           <span className="pet-details-text">
-                            {appointment.pet?.breed} •{" "}
-                            {appointment.pet?.age} years old
+                            {appointment.pet?.breed} • {appointment.pet?.age}{" "}
+                            years old
                           </span>
                         </div>
                       </div>
@@ -522,9 +592,13 @@ export function ProfilePage({
               <p className="empty-text">
                 You do not have any scheduled appointments yet.
               </p>
-              <Button onClick={() => onNavigate("booking")}>
+              <Button
+                size="md"
+                className="btn-pill btn-pill-primary"
+                onClick={() => onNavigate("booking")}
+              >
                 <Calendar className="w-4 h-4 mr-2" />
-                Book Your First Appointment
+                Book Your Appointment
               </Button>
             </div>
           )}
@@ -539,7 +613,14 @@ export function ProfilePage({
               <CardTitle>My Pets</CardTitle>
               <CardDescription>Manage your pet information</CardDescription>
             </div>
-            <Button onClick={() => setAddingPet(true)}>
+            <Button
+              size="md"
+              className="btn-pill btn-pill-primary"
+              onClick={() => {
+                setAddingPet(true);
+                setEditingPetId(null); // close edit when adding
+              }}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Add Pet
             </Button>
@@ -548,10 +629,7 @@ export function ProfilePage({
 
         <CardContent className="profile-card-content">
           {pets.map((pet) => (
-            <div
-              key={pet._id || pet.id}
-              className="pet-card"
-            >
+            <div key={pet._id || pet.id} className="pet-card">
               <div className="pet-info">
                 <div>
                   <h4>{pet.name}</h4>
@@ -561,7 +639,20 @@ export function ProfilePage({
                 </div>
                 <Badge variant="outline">{pet.species}</Badge>
               </div>
-              <Button variant="ghost" size="sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setEditingPetId(pet._id || pet.id);
+                  setAddingPet(false); // close add form when editing
+                  setEditPetForm({
+                    name: pet.name || "",
+                    species: pet.species || "",
+                    breed: pet.breed || "",
+                    age: pet.age || 0,
+                  });
+                }}
+              >
                 <Edit className="w-4 h-4" />
               </Button>
             </div>
@@ -621,8 +712,95 @@ export function ProfilePage({
                 </div>
               </div>
               <div className="add-pet-buttons">
-                <Button onClick={handleAddPet}>Add Pet</Button>
-                <Button variant="outline" onClick={() => setAddingPet(false)}>
+                <Button
+                  size="md"
+                  className="btn-pill btn-pill-primary"
+                  onClick={handleAddPet}
+                >
+                  Add Pet
+                </Button>
+                <Button
+                  variant="outline"
+                  className="btn-pill btn-pill-outline"
+                  size="md"
+                  onClick={() => setAddingPet(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {editingPetId && (
+            <div className="add-pet-form">
+              <h4 className="font-semibold">Edit Pet</h4>
+              <div className="profile-grid-2col">
+                <div>
+                  <Label htmlFor="editPetName">Name</Label>
+                  <Input
+                    id="editPetName"
+                    value={editPetForm.name}
+                    onChange={(e) =>
+                      setEditPetForm({ ...editPetForm, name: e.target.value })
+                    }
+                    placeholder="Pet name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editSpecies">Species</Label>
+                  <Input
+                    id="editSpecies"
+                    value={editPetForm.species}
+                    onChange={(e) =>
+                      setEditPetForm({
+                        ...editPetForm,
+                        species: e.target.value,
+                      })
+                    }
+                    placeholder="Dog, Cat, etc."
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editBreed">Breed</Label>
+                  <Input
+                    id="editBreed"
+                    value={editPetForm.breed}
+                    onChange={(e) =>
+                      setEditPetForm({ ...editPetForm, breed: e.target.value })
+                    }
+                    placeholder="Pet breed"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editAge">Age</Label>
+                  <Input
+                    id="editAge"
+                    type="number"
+                    value={editPetForm.age}
+                    onChange={(e) =>
+                      setEditPetForm({
+                        ...editPetForm,
+                        age: parseInt(e.target.value, 10) || 0,
+                      })
+                    }
+                    placeholder="Age in years"
+                  />
+                </div>
+              </div>
+              <div className="add-pet-buttons">
+                <Button
+                  size="md"
+                  className="btn-pill btn-pill-primary"
+                  onClick={handleUpdatePet}
+                >
+                  Save Changes
+                </Button>
+                <Button
+                  variant="outline"
+                  className="btn-pill btn-pill-outline"
+                  size="md"
+                  onClick={() => setEditingPetId(null)}
+                >
                   Cancel
                 </Button>
               </div>
