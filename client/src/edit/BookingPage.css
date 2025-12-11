@@ -27,3 +27,656 @@
 .shadow {
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
+
+/* Pet selection list wrapper */
+.pet-selection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* space between pet cards */
+}
+
+/* Base pet card */
+.pet-card-selectable {
+  padding: 1rem; /* p-4 */
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+/* Hover state for unselected cards */
+.pet-card-selectable:hover {
+  background-color: var(--color-muted);
+}
+
+/* Selected pet card (replaces ring + bg-primary/5) */
+.pet-card-selected {
+  border: 2px solid var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 5%, transparent);
+}
+
+/* Inner layout: name/badge row */
+.pet-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Secondary text for breed + age */
+.pet-breed-age {
+  color: var(--color-muted-foreground);
+  font-size: 0.875rem;
+}
+
+/* Empty state copy */
+.empty-pets-message {
+  text-align: center;
+  color: var(--color-muted-foreground);
+  padding: 1rem 0;
+  font-size: 0.9rem;
+}
+
+/* Outer date section wrapper */
+.calendar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* White calendar card inside main card */
+.calendar-card {
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background-color: #ffffff;
+  padding: 1.5rem;
+}
+
+/* The actual <input type="date"> for stub calendar */
+.calendar-input {
+  width: 100%;
+  max-width: 18rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+}
+
+/* Legend below calendar */
+.calendar-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.calendar-legend-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.calendar-legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.calendar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-indicator {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-border);
+}
+
+.legend-available {
+  background-color: rgb(220 252 231);
+}
+
+.legend-limited {
+  background-color: rgb(254 243 199);
+}
+
+.legend-booked {
+  background-color: rgb(254 226 226);
+}
+
+/* Time slot selection */
+.time-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.time-slot-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  border-radius: 9999px; /* pill shape */
+  border: 1px solid var(--color-border);
+  background-color: #ffffff;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.time-slot-button:hover {
+  background-color: var(--color-accent, #f9fafb);
+}
+
+.time-slot-selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.time-slot-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.time-slot-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.time-slot-label {
+  font-weight: 500;
+}
+
+/* Empty state */
+.time-empty-state {
+  text-align: center;
+  color: var(--color-muted-foreground);
+  padding: 2rem 0;
+}
+
+.time-empty-icon {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 1rem;
+  opacity: 0.5;
+}
+
+/* Additional notes textarea */
+.booking-notes-textarea {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  border-radius: 5px; /* pill-like ends */
+  border: none;
+  background-color: #f5f5f7; /* light gray fill */
+  color: inherit;
+  resize: vertical;
+  min-height: 3rem;
+  box-sizing: border-box;
+}
+
+.booking-notes-textarea::placeholder {
+  color: var(--color-muted-foreground);
+}
+
+.booking-notes-textarea:focus-visible {
+  outline: 2px solid var(--color-ring, #2563eb);
+  outline-offset: 2px;
+}
+
+/* Appointment summary */
+.appointment-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.summary-label {
+  color: var(--color-muted-foreground);
+}
+
+.summary-value {
+  font-weight: 500;
+}
+
+.summary-divider {
+  margin: 0.75rem 0;
+  border: none;
+  border-top: 1px solid var(--color-border);
+}
+
+.summary-section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-muted-foreground);
+}
+
+.summary-pet-details {
+  font-size: 0.9rem;
+}
+
+/* CTA button */
+.summary-next-button {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 9999px;
+  border: none;
+  background-color: #5b5b66;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.summary-next-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Helper text */
+.summary-helper-text {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-muted-foreground);
+}
+
+.booking-two-column {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.booking-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .booking-two-column {
+    grid-template-columns: 1.1fr 0.9fr; /* adjust ratio if needed */
+    align-items: flex-start;
+  }
+}
+.booking-container {
+  max-width: 80rem; /* same width as profile-container */
+  margin: 0 auto; /* center on page */
+  padding: 1.5rem; /* same inner padding */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bg-card {
+  background-color: var(--card);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.text-card-foreground {
+  color: var(--primary);
+}
+
+.border {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--color-border, #e5e7eb);
+}
+
+.shadow {
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+/* Services list layout */
+.services-list-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.services-category-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Individual service card */
+.service-card {
+  max-width: 26rem;
+  border-radius: 1rem;
+}
+
+.service-card-content {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+}
+
+/* Selected state ring */
+.service-card-selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+/* Header row */
+.service-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.service-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.service-card-title {
+  font-weight: 600;
+}
+
+/* Heart icon */
+.service-card-heart {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-muted-foreground);
+}
+
+/* Description */
+.service-card-description {
+  font-size: 0.9rem;
+  color: var(--color-muted-foreground);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+/* Footer row */
+.service-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.service-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.service-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.service-meta-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-muted-foreground);
+}
+
+/* Category pill */
+.service-category-pill {
+  padding: 0.15rem 0.7rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  font-size: 0.75rem;
+  background-color: #fff;
+}
+
+.service-checkbox {
+  width: 1.25rem; /* 20px */
+  height: 1.25rem;
+}
+
+.service-checkbox span {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+.services-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* or flex-start if you want them grouped */
+  gap: 1rem;
+  padding-top: 1.5rem;
+  white-space: nowrap; /* prevent text wrapping inside buttons */
+}
+
+/* If buttons still wrap on very small screens, allow horizontal scroll instead */
+@media (max-width: 640px) {
+  .services-footer-row {
+    overflow-x: auto;
+  }
+}
+
+/* Confirmation bottom card (right column) */
+.confirmation-actions-card {
+  border-radius: 1rem;
+}
+
+.confirmation-actions-content {
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Primary pill button: dark, full-width */
+.confirmation-primary-btn {
+  width: 100%;
+  border-radius: 9999px;
+  height: 2.75rem;
+  justify-content: center;
+  background-color: #050315;
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.confirmation-primary-btn:hover {
+  background-color: #020012;
+}
+
+/* Secondary pill button: white with border */
+.confirmation-secondary-btn {
+  width: 100%;
+  border-radius: 9999px;
+  height: 2.75rem;
+  justify-content: center;
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.confirmation-secondary-btn:hover {
+  background-color: #f5f5f7;
+}
+
+/* Helper text under buttons */
+.confirmation-helper-text {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--color-muted-foreground);
+}
+
+.appointment-card {
+  border-radius: 1rem;
+}
+
+.appointment-card-header {
+  padding: 1.25rem 1.5rem 0.75rem 1.5rem;
+}
+
+.appointment-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Content spacing */
+.appointment-card-content {
+  padding: 0 1.5rem 1.25rem 1.5rem;
+}
+
+/* Date / Time row */
+.appointment-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 3rem;
+  row-gap: 0.75rem;
+}
+
+.appointment-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.appointment-field-right {
+  text-align: left; /* matches screenshot where both columns align left */
+}
+
+.appointment-label {
+  font-size: 0.85rem;
+  color: var(--color-muted-foreground);
+}
+
+.appointment-value {
+  font-size: 0.95rem;
+}
+
+.appointment-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Divider between date/time and pet */
+.appointment-divider {
+  margin: 1.25rem 0 1rem 0;
+  border: none;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Pet section */
+.appointment-pet-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.appointment-pet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.appointment-pet-name {
+  font-weight: 500;
+}
+
+.appointment-pet-meta {
+  font-size: 0.85rem;
+  color: var(--color-muted-foreground);
+}
+
+/* Species pill like screenshot */
+.appointment-species-pill {
+  border-radius: 9999px;
+  padding-inline: 0.75rem;
+  padding-block: 0.15rem;
+  font-size: 0.75rem;
+}
+
+.selected-services-card {
+  border-radius: 1rem;
+}
+
+/* Header */
+.selected-services-header {
+  padding: 1.25rem 1.5rem 0.75rem 1.5rem;
+}
+
+.selected-services-title {
+  font-size: 1rem;
+}
+
+/* Content */
+.selected-services-content {
+  padding: 0 1.5rem 1.25rem 1.5rem;
+  background-color: #f5f5f7;
+}
+
+/* Service rows */
+.selected-services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.selected-service-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.selected-service-name {
+  font-size: 0.95rem;
+}
+
+.selected-service-duration {
+  font-size: 0.85rem;
+  color: var(--color-muted-foreground);
+}
+
+/* Price on the right */
+.selected-service-price {
+  font-size: 0.95rem;
+}
+
+/* Divider + total row */
+.selected-services-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 0.25rem 0 0.75rem 0;
+}
+
+.selected-services-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.selected-services-total-label {
+  font-size: 0.95rem;
+}
+
+.selected-services-total-value {
+  font-size: 0.95rem;
+}

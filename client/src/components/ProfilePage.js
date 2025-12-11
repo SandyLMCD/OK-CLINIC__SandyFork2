@@ -436,14 +436,15 @@ export function ProfilePage({
                           <Calendar className="appointment-icon" />
                           <div>
                             <h4>
-                              {new Date(
-                                appointment.date
-                              ).toLocaleDateString("en-US", {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              })}
+                              {new Date(appointment.date).toLocaleDateString(
+                                "en-US",
+                                {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                }
+                              )}
                             </h4>
                             <div className="appointment-time">
                               <Clock className="appointment-time-icon" />
@@ -483,10 +484,7 @@ export function ProfilePage({
                             <p className="pet-info-label">Services</p>
                             <div className="services-list">
                               {appointment.services.map((service) => (
-                                <div
-                                  key={service.id}
-                                  className="service-item"
-                                >
+                                <div key={service.id} className="service-item">
                                   <div className="pet-details">
                                     <Heart className="service-icon" />
                                     <span className="service-name">

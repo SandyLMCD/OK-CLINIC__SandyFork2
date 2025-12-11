@@ -109,10 +109,7 @@ function Badge({ children, variant = "default", className = "", ...props }) {
 
 function Textarea({ className = "", ...props }) {
   return (
-    <textarea
-      className={`flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 placeholder:text-muted-foreground ${className}`}
-      {...props}
-    />
+    <textarea className={`booking-notes-textarea ${className}`} {...props} />
   );
 }
 
@@ -275,11 +272,9 @@ export function BookingPage({
   const handleServiceToggle = (service, checked) => {
     setSelectedServices((prev) => {
       if (checked) {
-        // add if not already in
         if (prev.some((s) => s.id === service.id)) return prev;
         return [...prev, service];
       }
-      // remove
       return prev.filter((s) => s.id !== service.id);
     });
   };
@@ -311,7 +306,6 @@ export function BookingPage({
   const handleBackToDetails = () => setCurrentStep("details");
   const handleBackToServices = () => setCurrentStep("services");
 
-  const isDetailsValid = selectedDate && selectedTime && selectedPet;
   const today = new Date();
   const minDate = new Date(
     today.getFullYear(),
@@ -349,9 +343,10 @@ export function BookingPage({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column */}
-          <div className="space-y-6">
+        {/* TWO-COLUMN LAYOUT */}
+        <div className="booking-two-column">
+          {/* Column 1: Pet, Date, Time */}
+          <div className="booking-column">
             {/* Pet Selection */}
             <Card>
               <CardHeader>
@@ -361,31 +356,41 @@ export function BookingPage({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {pets.map((pet) => (
-                    <div
-                      key={pet._id}
-                      className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                        selectedPet?._id === pet._id
-                          ? "ring-2 ring-primary bg-primary/5"
-                          : "hover:bg-muted"
-                      }`}
-                      onClick={() => setSelectedPet(pet)}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h4>{pet.name}</h4>
-                          <p className="text-muted-foreground">
-                            {pet.breed} • {pet.age} years old
-                          </p>
+                <div className="pet-selection-list">
+                  {pets.map((pet) => {
+                    const petId = pet.id || pet._id;
+                    const selectedId = selectedPet?.id || selectedPet?._id;
+                    const isSelected = selectedId === petId;
+
+                    return (
+                      <div
+                        key={petId}
+                        className={
+                          "pet-card-selectable" +
+                          (isSelected ? " pet-card-selected" : "")
+                        }
+                        onClick={() =>
+                          setSelectedPet((current) => {
+                            const currentId = current?.id || current?._id;
+                            return currentId === petId ? null : pet;
+                          })
+                        }
+                      >
+                        <div className="pet-card-content">
+                          <div>
+                            <h4>{pet.name}</h4>
+                            <p className="pet-meta pet-breed-age">
+                              {pet.breed} • {pet.age} years old
+                            </p>
+                          </div>
+                          <Badge variant="outline">{pet.species}</Badge>
                         </div>
-                        <Badge variant="outline">{pet.species}</Badge>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
 
                   {pets.length === 0 && (
-                    <p className="text-center text-muted-foreground py-4">
+                    <p className="empty-pets-message">
                       No pets found. Please add a pet to your profile first.
                     </p>
                   )}
@@ -401,35 +406,86 @@ export function BookingPage({
                   Choose your preferred appointment date
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <Calendar
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  disabled={(date) => date < minDate}
-                  className="rounded-md border px-3 py-2"
-                />
+              <CardContent>
+                <div className="calendar-wrapper">
+                  <div className="calendar-card">
+                    <Calendar
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      disabled={(date) => date < minDate}
+                      className="calendar-input"
+                    />
+                  </div>
 
-                {/* Legend */}
-                <div className="space-y-2 pt-4 border-t">
-                  <p className="text-sm">Availability Legend:</p>
-                  <div className="flex flex-wrap gap-3 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-green-100 dark:bg-green-950 border" />
-                      <span>Available</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-amber-100 dark:bg-amber-950 border" />
-                      <span>Limited Slots</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-red-100 dark:bg-red-950 border" />
-                      <span>Fully Booked</span>
+                  <div className="calendar-legend">
+                    <p className="calendar-legend-title">
+                      Availability Legend:
+                    </p>
+                    <div className="calendar-legend-items">
+                      <div className="calendar-legend-item">
+                        <span className="legend-indicator legend-available" />
+                        <span>Available</span>
+                      </div>
+                      <div className="calendar-legend-item">
+                        <span className="legend-indicator legend-limited" />
+                        <span>Limited Slots</span>
+                      </div>
+                      <div className="calendar-legend-item">
+                        <span className="legend-indicator legend-booked" />
+                        <span>Fully Booked</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
+            {/* Time Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Select Time</CardTitle>
+                <CardDescription>
+                  {selectedDate
+                    ? `Available slots for ${selectedDate.toLocaleDateString()}`
+                    : "Please select a date first"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {selectedDate ? (
+                  <div className="time-slots-grid">
+                    {timeSlots.map((time) => {
+                      const isSelected = selectedTime === time;
+                      const isDisabled = !isTimeSlotAvailable(time);
+                      return (
+                        <button
+                          key={time}
+                          type="button"
+                          className={
+                            "time-slot-button" +
+                            (isSelected ? " time-slot-selected" : "") +
+                            (isDisabled ? " time-slot-disabled" : "")
+                          }
+                          onClick={() => !isDisabled && setSelectedTime(time)}
+                          disabled={isDisabled}
+                        >
+                          <Clock className="time-slot-icon" />
+                          <span className="time-slot-label">{time}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="time-empty-state">
+                    <CalendarIcon className="time-empty-icon" />
+                    <p>Select a date to view available time slots</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Column 2: Notes, Summary */}
+          <div className="booking-column">
             {/* Additional Notes */}
             <Card>
               <CardHeader>
@@ -447,94 +503,58 @@ export function BookingPage({
                 />
               </CardContent>
             </Card>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-6">
-            {/* Time Selection */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Select Time</CardTitle>
-                <CardDescription>
-                  {selectedDate
-                    ? `Available slots for ${selectedDate.toLocaleDateString()}`
-                    : "Please select a date first"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {selectedDate ? (
-                  <div className="grid grid-cols-3 gap-3">
-                    {timeSlots.map((time) => (
-                      <Button
-                        key={time}
-                        variant={selectedTime === time ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setSelectedTime(time)}
-                        className="flex items-center gap-2"
-                        disabled={!isTimeSlotAvailable(time)}
-                      >
-                        <Clock className="w-4 h-4" />
-                        {time}
-                      </Button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center text-muted-foreground py-8">
-                    <CalendarIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>Select a date to view available time slots</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
 
             {/* Summary */}
             <Card>
               <CardHeader>
                 <CardTitle>Appointment Summary</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Pet:</span>
-                    <span>{selectedPet?.name || "Not selected"}</span>
-                  </div>
 
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Date:</span>
-                    <span>
-                      {selectedDate?.toLocaleDateString() || "Not selected"}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Time:</span>
-                    <span>{selectedTime || "Not selected"}</span>
-                  </div>
-
-                  {selectedPet && (
-                    <div className="pt-3 border-t">
-                      <p className="text-muted-foreground mb-2">Pet Details:</p>
-                      <p>
-                        {selectedPet.breed} • {selectedPet.age} years old
-                      </p>
-                    </div>
-                  )}
+              <CardContent className="appointment-summary">
+                <div className="summary-row">
+                  <span className="summary-label">Pet:</span>
+                  <span className="summary-value">
+                    {selectedPet ? selectedPet.name : "Not selected"}
+                  </span>
                 </div>
 
-                <Button
-                  className="w-full mt-6 btn-pill btn-pill-primary"
-                  onClick={handleNextFromDetails}
-                  disabled={!isDetailsValid}
-                >
-                  Next: Add Services (Optional)
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                <div className="summary-row">
+                  <span className="summary-label">Date:</span>
+                  <span className="summary-value">
+                    {selectedDate
+                      ? selectedDate.toLocaleDateString()
+                      : "Not selected"}
+                  </span>
+                </div>
 
-                {!isDetailsValid && (
-                  <p className="text-sm text-muted-foreground text-center">
-                    Please select a pet, date, and time to continue
-                  </p>
-                )}
+                <div className="summary-row">
+                  <span className="summary-label">Time:</span>
+                  <span className="summary-value">
+                    {selectedTime || "Not selected"}
+                  </span>
+                </div>
+
+                <hr className="summary-divider" />
+
+                <div className="summary-section-title">Pet Details:</div>
+                <div className="summary-pet-details">
+                  {selectedPet
+                    ? `${selectedPet.breed} • ${selectedPet.age}`
+                    : "No pet selected"}
+                </div>
+
+                <button
+                  type="button"
+                  className="summary-next-button"
+                  disabled={!selectedPet || !selectedDate || !selectedTime}
+                  onClick={handleNextFromDetails}
+                >
+                  Next: Add Services (Optional) →
+                </button>
+
+                <p className="summary-helper-text">
+                  Please select a pet, date, and time to continue
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -551,41 +571,20 @@ export function BookingPage({
     );
 
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-semibold">Add Services (Optional)</h1>
-            <p className="text-muted-foreground">
-              Step 2 of 3: Select additional services or skip for booking only
-            </p>
-          </div>
-
-          {selectedServices.length > 0 && (
-            <Card className="w-80">
-              <CardContent className="p-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Selected Services:</span>
-                    <span>{selectedServices.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Total Duration:</span>
-                    <span>{totalDuration} minutes</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Total Price:</span>
-                    <span>${servicesTotal.toFixed(2)}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+      <div className="booking-container mx-auto p-6 space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Add Services (Optional)</h1>
+          <p className="text-muted-foreground">
+            Step 2 of 3: Select additional services or skip for booking only
+          </p>
         </div>
 
-        {categories.map((category) => (
-          <div key={category}>
-            <h2 className="mb-4 text-lg font-semibold">{category}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Single-column list like your screenshot */}
+        <div className="services-list-vertical">
+          {categories.map((category) => (
+            <div key={category} className="services-category-block">
+              <h2 className="mb-4 text-lg font-semibold">{category}</h2>
+
               {availableServices
                 .filter((service) => service.category === category)
                 .map((service) => {
@@ -596,70 +595,85 @@ export function BookingPage({
                   return (
                     <Card
                       key={service.id}
-                      className={`cursor-pointer transition-all ${
-                        isSelected ? "ring-2 ring-primary" : ""
-                      }`}
+                      className={
+                        "service-card cursor-pointer transition-all" +
+                        (isSelected ? " service-card-selected" : "")
+                      }
                     >
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="flex items-center gap-2 text-base">
-                              <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={(checked) =>
-                                  handleServiceToggle(service, checked)
-                                }
-                              />
-                              {service.name}
-                            </CardTitle>
-                            <CardDescription className="mt-2">
-                              {service.description}
-                            </CardDescription>
-                          </div>
-                          <Heart className="w-5 h-5 text-muted-foreground" />
-                        </div>
-                      </CardHeader>
+                      <CardContent className="service-card-content">
+                        {/* Header row: checkbox + title, heart on right */}
+                        <div className="service-card-header">
+                          <div className="service-card-title-group">
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={(checked) =>
+                                handleServiceToggle(service, checked)
+                              }
+                              className="service-checkbox"
+                            />
 
-                      <CardContent>
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1">
-                              <DollarSign className="w-4 h-4 text-muted-foreground" />
-                              <span>${service.price}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4 text-muted-foreground" />
-                              <span>{service.duration}min</span>
-                            </div>
+                            <span className="service-card-title">
+                              {service.name}
+                            </span>
                           </div>
-                          <Badge variant="outline">{service.category}</Badge>
+                          <Heart className="service-card-heart" />
+                        </div>
+
+                        {/* Description */}
+                        <p className="service-card-description">
+                          {service.description}
+                        </p>
+
+                        {/* Footer: price + duration left, category pill right */}
+                        <div className="service-card-footer">
+                          <div className="service-card-meta">
+                            <span className="service-meta-item">
+                              <DollarSign className="service-meta-icon" />
+                              <span>${service.price}</span>
+                            </span>
+                            <span className="service-meta-item">
+                              <Clock className="service-meta-icon" />
+                              <span>{service.duration}min</span>
+                            </span>
+                          </div>
+                          <span className="service-category-pill">
+                            {service.category}
+                          </span>
                         </div>
                       </CardContent>
                     </Card>
                   );
                 })}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
-        <div className="flex gap-4 justify-between items-center pt-6">
-          <Button variant="outline" onClick={handleBackToDetails}>
+        {/* Footer actions */}
+        <div className="services-footer-row">
+          <Button
+            variant="outline"
+            onClick={handleBackToDetails}
+            className="btn-pill btn-pill-outline"
+          >
             Back to Details
           </Button>
 
-          <div className="flex gap-4">
-            <Button variant="outline" onClick={handleSkipServices}>
-              Skip Services (Booking Only - Free)
-            </Button>
+          <Button
+            variant="outline"
+            onClick={handleSkipServices}
+            className="btn-pill btn-pill-outline"
+          >
+            Skip Services (Booking Only - Free)
+          </Button>
 
-            <Button
-              onClick={handleContinueWithServices}
-              disabled={selectedServices.length === 0}
-            >
-              Continue with Services
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
+          <Button
+            onClick={handleContinueWithServices}
+            disabled={selectedServices.length === 0}
+            className="btn-pill btn-pill-primary"
+          >
+            Continue with Services
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
         </div>
       </div>
     );
@@ -674,7 +688,7 @@ export function BookingPage({
     );
 
     return (
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="booking-container mx-auto p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-semibold">Confirm Booking</h1>
           <p className="text-muted-foreground">
@@ -682,81 +696,96 @@ export function BookingPage({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="booking-two-column">
           {/* Left Column - Appointment Details */}
-          <div className="space-y-6">
+          <div className="booking-column">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+              <CardHeader className="appointment-card-header">
+                <CardTitle className="appointment-card-title">
                   <CalendarIcon className="w-5 h-5" />
-                  Appointment Details
+                  <span>Appointment Details</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-muted-foreground">Date</p>
-                    <p>{selectedDate?.toLocaleDateString()}</p>
+
+              <CardContent className="appointment-card-content">
+                {/* Date / Time row */}
+                <div className="appointment-row">
+                  <div className="appointment-field">
+                    <p className="appointment-label">Date</p>
+                    <p className="appointment-value">
+                      {selectedDate?.toLocaleDateString()}
+                    </p>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Time</p>
-                    <p className="flex items-center gap-1">
+                  <div className="appointment-field appointment-field-right">
+                    <p className="appointment-label">Time</p>
+                    <p className="appointment-value appointment-time">
                       <Clock className="w-4 h-4" />
-                      {selectedTime}
+                      <span>{selectedTime}</span>
                     </p>
                   </div>
                 </div>
 
-                <div className="border-t pt-4">
-                  <p className="text-muted-foreground">Pet</p>
-                  <div className="flex items-center justify-between mt-1">
+                <hr className="appointment-divider" />
+
+                {/* Pet row */}
+                <div className="appointment-pet-section">
+                  <p className="appointment-label">Pet</p>
+                  <div className="appointment-pet-row">
                     <div>
-                      <p>{selectedPet?.name}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="appointment-pet-name">
+                        {selectedPet?.name}
+                      </p>
+                      <p className="appointment-pet-meta">
                         {selectedPet?.breed} • {selectedPet?.age} years old
                       </p>
                     </div>
-                    <Badge variant="outline">{selectedPet?.species}</Badge>
+                    <Badge
+                      variant="outline"
+                      className="appointment-species-pill"
+                    >
+                      {selectedPet?.species}
+                    </Badge>
                   </div>
                 </div>
-
-                {notes && (
-                  <div className="border-t pt-4">
-                    <p className="text-muted-foreground mb-2">Notes</p>
-                    <p className="text-sm">{notes}</p>
-                  </div>
-                )}
               </CardContent>
             </Card>
 
             {selectedServices.length > 0 && (
               <Card>
-                <CardHeader>
-                  <CardTitle>Selected Services</CardTitle>
+                <CardHeader className="selected-services-header">
+                  <CardTitle className="selected-services-title">
+                    Selected Services
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
+
+                <CardContent className="selected-services-content">
+                  <div className="selected-services-list">
                     {selectedServices.map((service) => (
-                      <div
-                        key={service.id}
-                        className="flex justify-between items-start"
-                      >
-                        <div className="flex-1">
-                          <p>{service.name}</p>
-                          <p className="text-sm text-muted-foreground">
+                      <div key={service.id} className="selected-service-row">
+                        <div>
+                          <p className="selected-service-name">
+                            {service.name}
+                          </p>
+                          <p className="selected-service-duration">
                             {service.duration} minutes
                           </p>
                         </div>
-                        <p>${service.price}</p>
+                        <p className="selected-service-price">
+                          ${service.price}
+                        </p>
                       </div>
                     ))}
+                  </div>
 
-                    <div className="border-t pt-3">
-                      <div className="flex justify-between">
-                        <span>Total Duration:</span>
-                        <span>{totalDuration} minutes</span>
-                      </div>
-                    </div>
+                  <hr className="selected-services-divider" />
+
+                  <div className="selected-services-total-row">
+                    <span className="selected-services-total-label">
+                      Total Duration:
+                    </span>
+                    <span className="selected-services-total-value">
+                      {totalDuration} minutes
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -764,12 +793,15 @@ export function BookingPage({
           </div>
 
           {/* Right Column - Payment Summary */}
-          <div className="space-y-6">
+          <div className="booking-column">
             <Card>
-              <CardHeader>
-                <CardTitle>Payment Summary</CardTitle>
+              <CardHeader className="payment-card-header">
+                <CardTitle className="payment-card-title">
+                  Payment Summary
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+
+              <CardContent className="payment-card-content">
                 {isBookingOnly ? (
                   <div className="text-center py-6">
                     <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
@@ -783,41 +815,47 @@ export function BookingPage({
                   </div>
                 ) : (
                   <>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">
-                          Services Total:
-                        </span>
-                        <span>${servicesTotal.toFixed(2)}</span>
-                      </div>
+                    {/* Services total row */}
+                    <div className="payment-row">
+                      <span className="payment-label">Services Total:</span>
+                      <span className="payment-value">
+                        ${servicesTotal.toFixed(2)}
+                      </span>
+                    </div>
 
-                      <div className="border-t pt-3">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p>50% Deposit Required</p>
-                            <p className="text-sm text-muted-foreground">
-                              Non-refundable
-                            </p>
-                          </div>
-                          <p className="text-lg">${depositAmount.toFixed(2)}</p>
-                        </div>
-                      </div>
+                    <hr className="payment-divider" />
 
-                      <div className="border-t pt-3">
-                        <div className="flex justify-between text-muted-foreground">
-                          <span>Balance Due:</span>
-                          <span>
-                            {(servicesTotal - depositAmount).toFixed(2)}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
+                    {/* Deposit row */}
+                    <div className="payment-row">
+                      <div>
+                        <p className="payment-label-strong">
+                          50% Deposit Required
+                        </p>
+                        <p className="payment-subtext">Non-refundable</p>
+                      </div>
+                      <span className="payment-value">
+                        ${depositAmount.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <hr className="payment-divider" />
+
+                    {/* Balance row */}
+                    <div className="payment-row">
+                      <div>
+                        <p className="payment-label-strong">Balance Due:</p>
+                        <p className="payment-subtext">
                           Payable at appointment
                         </p>
                       </div>
+                      <span className="payment-value payment-value-muted">
+                        ${(servicesTotal - depositAmount).toFixed(2)}
+                      </span>
                     </div>
 
-                    <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mt-4">
-                      <p className="text-sm">
+                    {/* Note box */}
+                    <div className="payment-note">
+                      <p className="payment-note-text">
                         <strong>Note:</strong> The 50% deposit ($
                         {depositAmount.toFixed(2)}) is non-refundable and
                         secures your appointment.
@@ -830,8 +868,11 @@ export function BookingPage({
 
             {/* Action Buttons */}
             <Card>
-              <CardContent className="p-6 space-y-4">
-                <Button className="w-full" onClick={handleConfirmBooking}>
+              <CardContent className="confirmation-actions-content">
+                <Button
+                  className="confirmation-primary-btn"
+                  onClick={handleConfirmBooking}
+                >
                   <CheckCircle className="w-4 h-4 mr-2" />
                   {isBookingOnly
                     ? "Confirm Booking"
@@ -840,13 +881,13 @@ export function BookingPage({
 
                 <Button
                   variant="outline"
-                  className="w-full"
+                  className="confirmation-secondary-btn"
                   onClick={handleBackToServices}
                 >
                   Back to Services
                 </Button>
 
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="confirmation-helper-text">
                   By confirming, you agree to our terms of service and booking
                   policy.
                 </p>
