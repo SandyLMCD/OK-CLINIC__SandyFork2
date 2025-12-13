@@ -622,6 +622,18 @@ export function ProfilePage({
               <Plus className="w-4 h-4 mr-2" />
               Add Pet
             </Button>
+
+            <Button
+              size="md"
+              className="btn-pill btn-pill-primary"
+              onClick={() => {
+                setAddingPet(true);
+                setEditingPetId(null);
+              }}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Delete Pet
+            </Button>
           </div>
         </CardHeader>
 
